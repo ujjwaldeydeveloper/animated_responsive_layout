@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'animations.dart';
 import 'models/data.dart' as data;
 import 'models/models.dart';
+import 'transitions/list_detail_transition.dart';
 import 'widgets/animated_floating_action_button.dart';
 import 'widgets/disappearing_bottom_navigation_bar.dart';
 import 'widgets/disappearing_navigation_rail.dart';
 import 'widgets/email_list_view.dart';
+import 'widgets/reply_list_view.dart';
 
 void main() {
   runApp(const MainApp());
@@ -97,8 +99,8 @@ class _FeedState extends State<Feed> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     // wrap with animatedBuilder
     return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _)  {
+        animation: _controller,
+        builder: (context, _) {
           return Scaffold(
             //added The leading widget of the Scaffold
             body: Row(
@@ -118,16 +120,21 @@ class _FeedState extends State<Feed> with SingleTickerProviderStateMixin {
                 Expanded(
                   child: Container(
                     color: _backgroundColor,
-                    child: EmailListView(
-                      // The currently selected index in the list
-                      selectedIndex: selectedIndex,
-                      onSelected: (index) {
-                        setState(() {
-                          selectedIndex = index;
-                        });
-                      },
-                      //....
-                      currentUser: widget.currentUser,
+                    // wrapping ListDetailTransition
+                    child: ListDetailTransition(
+                      animation: _railAnimation,
+                      one: EmailListView(
+                        // The currently selected index in the list
+                        selectedIndex: selectedIndex,
+                        onSelected: (index) {
+                          setState(() {
+                            selectedIndex = index;
+                          });
+                        },
+                        //....
+                        currentUser: widget.currentUser,
+                      ),
+                      two: const ReplyListView(),
                     ),
                   ),
                 ),
@@ -136,22 +143,21 @@ class _FeedState extends State<Feed> with SingleTickerProviderStateMixin {
             //The floating action button of the Scaffold only for mobile
             // chnaged the floating action button to AnimatedFloatingActionButton
             floatingActionButton: AnimatedFloatingActionButton(
-                    animation: _barAnimation,
-                    onPressed: () {},
-                    child: const Icon(Icons.add),
-                  ),
+              animation: _barAnimation,
+              onPressed: () {},
+              child: const Icon(Icons.add),
+            ),
             //modified The bottom navigation bar of the Scaffold only for mobile
             bottomNavigationBar: DisappearingBottomNavigationBar(
-                  barAnimation: _barAnimation,
-                  selectedIndex: selectedIndex,
-                  onDestinationSelected: (index) {
-                    setState(() {
-                      selectedIndex = index;
-                    });
-                  },
-                ),
+              barAnimation: _barAnimation,
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (index) {
+                setState(() {
+                  selectedIndex = index;
+                });
+              },
+            ),
           );
-        }
-    );
+        });
   }
 }
